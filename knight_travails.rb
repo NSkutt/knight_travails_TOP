@@ -5,16 +5,19 @@ class Board
   attr_reader :coords
 
   def initialize
-    @grid = build_board
-    p @grid
+    @grid = {}
+    build_board
   end
 
-  def build_board(coords = [0, 0])
+  def build_board(coords = [1, 1])
+    return nil unless (1..8).include?(coords[0]) && (1..8).include?(coords[1])
+
     n = Node.new(coords)
-    n.files[0] = build_board([coords[0] + 1, coords]) while coords[0] < 8
-    n.files[1] = build_board([coords[0] - 1, coords]) while coords[0] > 1
-    n.ranks[0] = build_board([coords, coords[1] + 1]) while coords[1] < 8
-    n.ranks[1] = build_board([coords, coords[1] - 1]) while coords[1] > 1
+    @grid[n] = coords
+    n.up = @grid.value?([coords[0], coords[1] + 1]) ? @grid.rassoc([coords[0], coords[1] + 1]) : build_board([coords[0], coords[1] + 1])
+    n.down = @grid.value?([coords[0], coords[1] - 1]) ? @grid.rassoc([coords[0], coords[1] - 1]) : build_board([coords[0], coords[1] - 1])
+    n.left = @grid.value?([coords[0] - 1, coords[1]]) ? @grid.rassoc([coords[0] - 1, coords[1]]) : build_board([coords[0] - 1, coords[1]])
+    n.right = @grid.value?([coords[0] + 1, coords[1]]) ? @grid.rassoc([coords[0] + 1, coords[1]]) : build_board([coords[0] + 1, coords[1]])
   end
 
   def piece_positions(piece, pos)
@@ -28,13 +31,15 @@ end
 
 # This will form the 'squares' or nodes
 class Node
+  attr_accessor :up, :down, :left, :right
   attr_reader :square
-  attr_writer :ranks, :files
 
   def initialize(coords)
     @square = coords
-    @ranks = [nil, nil]
-    @files = [nil, nil]
+    @up = nil
+    @down = nil
+    @left = nil
+    @right = nil
   end
 end
 
