@@ -39,6 +39,10 @@ class Board
   def places(piece, coords)
     @locations[piece] = coords
   end
+
+  def read_square(node_id)
+    ObjectSpace._id2ref(node_id)
+  end
 end
 
 # This will form the 'squares' or nodes

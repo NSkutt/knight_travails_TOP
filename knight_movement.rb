@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './knight_travails.rb'
+require './knight_board.rb'
 
 # moves the knight and tracks its location
 class Knight
