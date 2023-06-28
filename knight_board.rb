@@ -40,6 +40,12 @@ class Board
   def places(piece, coords)
     @locations[piece] = coords
   end
+
+  def make_knight(x_coord, y_coord)
+    raise 'Invalid Coordinates!' unless (1..8).include?(x_coord) && (1..8).include?(y_coord)
+
+    Knight.new([x_coord, y_coord])
+  end
 end
 
 # This will form the 'squares' or nodes
