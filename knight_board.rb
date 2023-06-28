@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require './knight_movement.rb'
 # Creates the board of interconnected squares
 class Board
   attr_accessor :locations
@@ -38,10 +39,6 @@ class Board
 
   def places(piece, coords)
     @locations[piece] = coords
-  end
-
-  def read_square(node_id)
-    ObjectSpace._id2ref(node_id)
   end
 end
 
