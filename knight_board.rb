@@ -15,7 +15,7 @@ class Board
   def build_board(x_axis = 1, y_axis = 1)
     return nil unless (1..8).include?(x_axis) && (1..8).include?(y_axis)
 
-    square = Node.new(coords)
+    square = Node.new([x_axis, y_axis])
     @grid[square] = [x_axis, y_axis]
     connect_squares(square, :up, [x_axis, y_axis + 1])
     connect_squares(square, :u_r, [x_axis + 1, y_axis + 1])
@@ -60,5 +60,5 @@ class Node
 end
 
 test = Board.new
-
+p test
 p test.make_knight(3, 3)
