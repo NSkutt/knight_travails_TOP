@@ -60,5 +60,5 @@ class Node
 end
 
 test = Board.new
-p test
+
 p test.make_knight(3, 3)
