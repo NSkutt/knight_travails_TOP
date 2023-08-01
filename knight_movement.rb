@@ -7,51 +7,46 @@ class Knight
   def initialize(coords)
     @position = coords
     @home = KnightNode.new(@position)
-    move_tree(@home)
-    build_tree(@home)
+    tree_builder(@home)
   end
 
-  def move_tree(place)
+  def tree_builder(place)
     place.possibilities.each_key do |direction|
-      current = place.square.connections
-      i = 0
-      while i < 3
-        moving = direction[i]
-        case moving
-        when 'n'
-          current = current[:up]
-        when 'e'
-          current = current[:right]
-        when 's'
-          current = current[:down]
-        when 'w'
-          current = current[:left]
-        end
-        return nil if current.nil?
-
-        current = ObjectSpace._id2ref(current).connections unless i == 2
-        i += 1
-      end
-      place.possibilities[direction] = current
+      coords = find_square(place, direction)
+      exists = search_tree(coords)
+      place.possibilities[direction] = exists || KnightNode.new(coords).object_id
     end
   end
 
-  def build_tree(place)
-    p 'test'
-    place.possibilities.each_value do |square|
-      p square
-      p ObjectSpace._id2ref(square).loc
-      xy = ObjectSpace._id2ref(square).loc
-      exists = search_tree(xy)
+  def find_square(place, direction)
+    current = place.square.connections
+    i = 0
+    while i < 3
+      moving = direction[i]
+      case moving
+      when 'n'
+        current = current[:up]
+      when 'e'
+        current = current[:right]
+      when 's'
+        current = current[:down]
+      when 'w'
+        current = current[:left]
+      end
+      return nil if current.nil?
 
+      current = ObjectSpace._id2ref(current).connections unless i == 2
+      i += 1
     end
+    ObjectSpace._id2ref(current)
   end
 
   def search_tree(destination, cur = @home)
-    return cur if destination == cur.square
-    return false unless cur.possibilities
+    return cur if destination == cur.square.loc
 
     cur.possibilities.each do |new_square|
+      return false if new_square.last.nil?
+
       search_tree(destination, ObjectSpace._id2ref(new_square.last))
     end
   end
@@ -67,8 +62,8 @@ class KnightNode
   attr_accessor :possibilities
   attr_reader :square
 
-  def initialize(coords)
-    @square = coords
+  def initialize(square_node)
+    @square = square_node
     @possibilities = { nnw: nil, nne: nil, ene: nil, ese: nil, sse: nil, ssw: nil, wsw: nil, wnw: nil }
   end
 end
