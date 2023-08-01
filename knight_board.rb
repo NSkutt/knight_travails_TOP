@@ -44,7 +44,8 @@ class Board
   def make_knight(x_coord, y_coord)
     raise 'Invalid Coordinates!' unless (1..8).include?(x_coord) && (1..8).include?(y_coord)
 
-    horse = Knight.new(@grid.key([x_coord, y_coord]))
+    place = @grid.key([x_coord, y_coord])
+    horse = Knight.new(place)
   end
 end
 
