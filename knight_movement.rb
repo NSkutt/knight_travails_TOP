@@ -13,6 +13,8 @@ class Knight
   def tree_builder(place)
     place.possibilities.each_key do |direction|
       coords = find_square(place, direction)
+      next if coords.nil?
+
       exists = search_tree(coords)
       place.possibilities[direction] = exists || KnightNode.new(coords).object_id
     end
@@ -50,7 +52,6 @@ class Knight
       search_tree(destination, ObjectSpace._id2ref(new_square.last))
     end
   end
-
 
   def movement(place, dir)
     ObjectSpace._id2ref(place.connections[dir])
