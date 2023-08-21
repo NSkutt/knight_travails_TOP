@@ -6,17 +6,33 @@ class Knight
 
   def initialize(coords)
     @position = coords
+    @moves = []
     @home = KnightNode.new(@position)
     tree_builder(@home)
   end
 
   def tree_builder(place)
+    p "xxx #{place.square.loc} xxx"
     place.possibilities.each_key do |direction|
       coords = find_square(place, direction)
       next if coords.nil?
 
       exists = search_tree(coords)
+      p "ex: #{exists}"
       place.possibilities[direction] = exists || KnightNode.new(coords).object_id
+    end
+    @moves.push(place)
+    recur(@moves.last)
+  end
+
+  # Will need to pass ObjSpac.id2ref of KnightNode.possibility[direction] to tree_builder
+  def recur(k_node)
+    p "kn: #{k_node.possibilities}"
+    k_node.possibilities.each do |_dir, id|
+      next_node = ObjectSpace._id2ref(id)
+      coords = next_node.square.loc
+      valid = coords.first.between?(1, 8) && coords.last.between?(1, 8)
+      tree_builder(next_node) while valid
     end
   end
 
@@ -46,11 +62,13 @@ class Knight
   def search_tree(destination, cur = @home)
     return cur if destination == cur.square.loc
 
+    result = 'x'
     cur.possibilities.each do |new_square|
       return false if new_square.last.nil?
 
-      search_tree(destination, ObjectSpace._id2ref(new_square.last))
+      result = search_tree(destination, ObjectSpace._id2ref(new_square.last))
     end
+    result
   end
 
   def movement(place, dir)
