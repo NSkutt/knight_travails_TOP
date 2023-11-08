@@ -2,7 +2,7 @@
 
 # moves the knight and tracks its location
 class Knight
-  attr_reader :position
+  attr_reader :position, :moves
 
   def initialize(coords)
     @position = coords
@@ -12,28 +12,34 @@ class Knight
   end
 
   def tree_builder(place)
-    p "xxx #{place.square.loc} xxx"
+    p "--#{place.object_id}--"
     place.possibilities.each_key do |direction|
       coords = find_square(place, direction)
       next if coords.nil?
 
       exists = search_tree(coords)
-      p "ex: #{exists}"
-      place.possibilities[direction] = exists || KnightNode.new(coords).object_id
+      place.possibilities[direction] = exists || fill_in(coords)
     end
+    p place
     @moves.push(place)
-    recur(@moves.last)
+    next_node = @moves.pop
+    tree_builder(next_node) unless node_exists(next_node)
   end
 
-  # Will need to pass ObjSpac.id2ref of KnightNode.possibility[direction] to tree_builder
-  def recur(k_node)
-    p "kn: #{k_node.possibilities}"
-    k_node.possibilities.each do |_dir, id|
-      next_node = ObjectSpace._id2ref(id)
-      coords = next_node.square.loc
-      valid = coords.first.between?(1, 8) && coords.last.between?(1, 8)
-      tree_builder(next_node) while valid
+  def fill_in(node)
+    explore = KnightNode.new(node)
+    # tree_builder(explore) CANNOT RECUR HERE, INFINITE LOOP
+    explore.object_id
+  end
+
+  def node_exists(node)
+    bool = ''
+    node.possibilities.each do |check|
+      return bool = true unless check.last.nil?
+
+      bool = false
     end
+    bool
   end
 
   def find_square(place, direction)
@@ -60,14 +66,18 @@ class Knight
   end
 
   def search_tree(destination, cur = @home)
-    return cur if destination == cur.square.loc
+    p cur.square.loc
+    GC.disable
+    return cur.object_id if destination.loc == cur.square.loc
 
     result = 'x'
     cur.possibilities.each do |new_square|
+      p "!!!#{new_square}!!!"
       return false if new_square.last.nil?
 
       result = search_tree(destination, ObjectSpace._id2ref(new_square.last))
     end
+    GC.enable
     result
   end
 
