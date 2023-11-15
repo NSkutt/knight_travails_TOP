@@ -12,7 +12,7 @@ class Knight
   end
 
   def tree_builder(place)
-    p "--#{place.object_id}--"
+    p ["--#{place.object_id}--", place.square.loc]
     place.possibilities.each_key do |direction|
       coords = find_square(place, direction)
       next if coords.nil?
@@ -20,10 +20,9 @@ class Knight
       exists = search_tree(coords)
       place.possibilities[direction] = exists || fill_in(coords)
     end
-    p place
-    @moves.push(place)
-    next_node = @moves.pop
-    tree_builder(next_node) unless node_exists(next_node)
+    populate(place)
+    next_node = @moves.shift
+    tree_builder(next_node) unless filled_in(next_node)
   end
 
   def fill_in(node)
@@ -32,7 +31,16 @@ class Knight
     explore.object_id
   end
 
-  def node_exists(node)
+  def populate(paths)
+    paths.possibilities.each_value do |n_id|
+      next if n_id.nil?
+
+      futures = ObjectSpace._id2ref(n_id)
+      @moves.push(futures)
+    end
+  end
+
+  def filled_in(node)
     bool = ''
     node.possibilities.each do |check|
       return bool = true unless check.last.nil?
@@ -65,17 +73,18 @@ class Knight
     ObjectSpace._id2ref(current)
   end
 
-  def search_tree(destination, cur = @home)
-    p cur.square.loc
+  def search_tree(destination, cur = @home, prev = [])
     GC.disable
     return cur.object_id if destination.loc == cur.square.loc
 
     result = 'x'
     cur.possibilities.each do |new_square|
-      p "!!!#{new_square}!!!"
       return false if new_square.last.nil?
 
-      result = search_tree(destination, ObjectSpace._id2ref(new_square.last))
+      coord = ObjectSpace._id2ref(new_square.last).square.loc
+      return false if prev.include?(coord)
+
+      result = search_tree(destination, ObjectSpace._id2ref(new_square.last), prev.push(cur.square.loc))
     end
     GC.enable
     result
