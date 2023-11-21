@@ -10,7 +10,8 @@ class Knight
     @moves = []
     @home = KnightNode.new(@position)
     tree_builder(@home)
-    p find_path
+    trails = find_path
+    p divide_trails(trails)
   end
 
   def tree_builder(place)
@@ -80,20 +81,42 @@ class Knight
     result
   end
 
-  def find_path(cur = @home, the_path_back = [], the_path_forward = [])
-    the_path_back.push(cur.square.loc)
+  def find_path(cur = @home, the_path_back = {}, the_path_forward = [], path = nil)
+    the_path_back.store(path, cur.square.loc)
     return the_path_back if @endpoint == cur.square.loc
 
-    cur.possibilities.each do |new_square|
-      next if new_square.last.nil?
+    futures_arr = routing(path, cur)
+    futures_arr.each do |k, v|
+      next if v.nil?
 
-      coord = ObjectSpace._id2ref(new_square.last).square.loc
-      next if the_path_back.include?(coord) || the_path_forward.to_s.include?(coord.to_s)
+      coord = ObjectSpace._id2ref(v).square.loc
+      next if the_path_back.values.include?(coord) || the_path_forward.to_s.include?(coord.to_s)
 
-      the_path_forward.push(ObjectSpace._id2ref(new_square.last))
+      the_path_forward.push({ k => ObjectSpace._id2ref(v) })
     end
     next_square = the_path_forward.shift
-    find_path(next_square, the_path_back, the_path_forward)
+    find_path(next_square.values.first, the_path_back, the_path_forward, next_square.keys.first)
+  end
+
+  def routing(cur_path, kn_node)
+    character = +'a'
+    hsh = {}
+    kn_node.possibilities.each do |future|
+      hsh.store( (cur_path.to_s + character), future.last )
+      character.next!
+    end
+    hsh
+  end
+
+  def divide_trails(trails)
+    trail_end = +trails.key(@endpoint)
+    shortest = []
+    while trail_end.length.positive?
+      shortest.push(trails.fetch(trail_end))
+      trail_end.chop!
+    end
+    shortest.push(trails.fetch(nil))
+    shortest.reverse.each { |square| p square }
   end
 end
 
