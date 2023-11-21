@@ -4,50 +4,42 @@
 class Knight
   attr_reader :position, :moves
 
-  def initialize(coords)
-    @position = coords
+  def initialize(start, finish)
+    @position = start
+    @endpoint = finish
     @moves = []
     @home = KnightNode.new(@position)
     tree_builder(@home)
+    p find_path
   end
 
   def tree_builder(place)
-    p ["--#{place.object_id}--", place.square.loc]
     place.possibilities.each_key do |direction|
       coords = find_square(place, direction)
       next if coords.nil?
 
       exists = search_tree(coords)
       place.possibilities[direction] = exists || fill_in(coords)
+      break if exists && end_loop(exists)
     end
-    populate(place)
     next_node = @moves.shift
-    tree_builder(next_node) unless filled_in(next_node)
+    tree_builder(next_node) unless next_node.nil?
   end
 
   def fill_in(node)
     explore = KnightNode.new(node)
-    # tree_builder(explore) CANNOT RECUR HERE, INFINITE LOOP
+    @moves.push(explore)
     explore.object_id
   end
 
-  def populate(paths)
-    paths.possibilities.each_value do |n_id|
-      next if n_id.nil?
-
-      futures = ObjectSpace._id2ref(n_id)
-      @moves.push(futures)
+  def end_loop(location)
+    coord_set = ObjectSpace._id2ref(location).square.loc
+    if coord_set == @endpoint
+      @moves.clear
+      true
+    else
+      false
     end
-  end
-
-  def filled_in(node)
-    bool = ''
-    node.possibilities.each do |check|
-      return bool = true unless check.last.nil?
-
-      bool = false
-    end
-    bool
   end
 
   def find_square(place, direction)
@@ -74,24 +66,34 @@ class Knight
   end
 
   def search_tree(destination, cur = @home, prev = [])
-    GC.disable
     return cur.object_id if destination.loc == cur.square.loc
 
-    result = 'x'
+    result = false
     cur.possibilities.each do |new_square|
-      return false if new_square.last.nil?
+      next if new_square.last.nil?
 
       coord = ObjectSpace._id2ref(new_square.last).square.loc
-      return false if prev.include?(coord)
+      next if prev.include?(coord)
 
-      result = search_tree(destination, ObjectSpace._id2ref(new_square.last), prev.push(cur.square.loc))
+      result = search_tree(destination, ObjectSpace._id2ref(new_square.last), prev.push(cur.square.loc)) || result
     end
-    GC.enable
     result
   end
 
-  def movement(place, dir)
-    ObjectSpace._id2ref(place.connections[dir])
+  def find_path(cur = @home, the_path_back = [], the_path_forward = [])
+    the_path_back.push(cur.square.loc)
+    return the_path_back if @endpoint == cur.square.loc
+
+    cur.possibilities.each do |new_square|
+      next if new_square.last.nil?
+
+      coord = ObjectSpace._id2ref(new_square.last).square.loc
+      next if the_path_back.include?(coord) || the_path_forward.to_s.include?(coord.to_s)
+
+      the_path_forward.push(ObjectSpace._id2ref(new_square.last))
+    end
+    next_square = the_path_forward.shift
+    find_path(next_square, the_path_back, the_path_forward)
   end
 end
 
