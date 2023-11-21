@@ -41,11 +41,16 @@ class Board
     @locations[piece] = coords
   end
 
-  def make_knight(x_coord, y_coord)
-    raise 'Invalid Coordinates!' unless (1..8).include?(x_coord) && (1..8).include?(y_coord)
+  def make_knight(start_node, end_node)
+    start_node.each do |coord|
+      raise 'Invalid Coordinates!' unless (1..8).include?(coord)
+    end
+    end_node.each do |coord|
+      raise 'Invalid Coordinates!' unless (1..8).include?(coord)
+    end
 
-    place = @grid.key([x_coord, y_coord])
-    horse = Knight.new(place)
+    place = @grid.key(start_node)
+    horse = Knight.new(place, end_node)
   end
 end
 
@@ -62,4 +67,4 @@ end
 
 test = Board.new
 
-p test.make_knight(3, 3)
+p test.make_knight([3, 3], [7, 7])
