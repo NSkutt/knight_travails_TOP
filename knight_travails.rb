@@ -1,46 +1,29 @@
 # frozen_string_literal: true
 
-# The game board to play on
-class Board
-  attr_reader :coords
-
+require './knight_board'
+# Takes input from user
+class KnightUI
   def initialize
-    @grid = {}
-    build_board
+    p 'Please input your starting square in the format [x, y] where x and y are numbers.'
+    @startpoint = cleanup(gets.chomp)
+    p 'Please input your end square in the format [x, y] where x and y are numbers.'
+    @endpoint = cleanup(gets.chomp)
   end
 
-  def build_board(coords = [1, 1])
-    return nil unless (1..8).include?(coords[0]) && (1..8).include?(coords[1])
+  def cleanup(input)
+    return input unless input.include?('[' && ']')
 
-    n = Node.new(coords)
-    @grid[n] = coords
-    n.up = @grid.value?([coords[0], coords[1] + 1]) ? @grid.rassoc([coords[0], coords[1] + 1]) : build_board([coords[0], coords[1] + 1])
-    n.down = @grid.value?([coords[0], coords[1] - 1]) ? @grid.rassoc([coords[0], coords[1] - 1]) : build_board([coords[0], coords[1] - 1])
-    n.left = @grid.value?([coords[0] - 1, coords[1]]) ? @grid.rassoc([coords[0] - 1, coords[1]]) : build_board([coords[0] - 1, coords[1]])
-    n.right = @grid.value?([coords[0] + 1, coords[1]]) ? @grid.rassoc([coords[0] + 1, coords[1]]) : build_board([coords[0] + 1, coords[1]])
+    cleaner = input[1...-1].split(',')
+    cleaner.map(&:to_i)
   end
 
-  def piece_positions(piece, pos)
-    @locations[piece] = pos
-  end
-
-  def occupied?(coords)
-    @locations.key?(coords)
+  def display_path
+    board = Board.new
+    knight = board.make_knight(@startpoint, @endpoint)
+    p "Your path is #{knight.path.length - 1} moves long. Here's your path:"
+    knight.path.reverse.each{ |coords| p coords }
   end
 end
 
-# This will form the 'squares' or nodes
-class Node
-  attr_accessor :up, :down, :left, :right
-  attr_reader :square
-
-  def initialize(coords)
-    @square = coords
-    @up = nil
-    @down = nil
-    @left = nil
-    @right = nil
-  end
-end
-
-test = Board.new
+x = KnightUI.new
+x.display_path

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './knight_movement.rb'
+require './knight_movement'
 # Creates the board of interconnected squares
 class Board
   attr_accessor :locations
@@ -50,7 +50,7 @@ class Board
     end
 
     place = @grid.key(start_node)
-    horse = Knight.new(place, end_node)
+    Knight.new(place, end_node)
   end
 end
 
@@ -64,7 +64,3 @@ class Node
     @connections = { up: nil, u_r: nil, right: nil, d_r: nil, down: nil, d_l: nil, left: nil, u_l: nil }
   end
 end
-
-test = Board.new
-
-p test.make_knight([3, 3], [7, 7])

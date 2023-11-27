@@ -2,7 +2,7 @@
 
 # moves the knight and tracks its location
 class Knight
-  attr_reader :position, :moves
+  attr_reader :position, :moves, :path
 
   def initialize(start, finish)
     @position = start
@@ -11,7 +11,7 @@ class Knight
     @home = KnightNode.new(@position)
     tree_builder(@home)
     trails = find_path
-    p divide_trails(trails)
+    @path = divide_trails(trails)
   end
 
   def tree_builder(place)
@@ -107,7 +107,7 @@ class Knight
       trail_end.chop!
     end
     shortest.push(trails.fetch(nil))
-    shortest.reverse.each { |square| p square }
+    shortest
   end
 end
 
