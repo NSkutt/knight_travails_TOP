@@ -91,13 +91,15 @@ class Knight
     character = +'a'
     hsh = {}
     kn_node.possibilities.each do |future|
-      hsh.store( (cur_path.to_s + character), future.last )
+      hsh.store((cur_path.to_s + character), future.last)
       character.next!
     end
     hsh
   end
 
   def divide_trails(trails)
+    return trails.values.last if trails.length < 2
+
     trail_end = +trails.key(@endpoint)
     shortest = []
     while trail_end.length.positive?
