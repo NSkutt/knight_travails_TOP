@@ -21,7 +21,6 @@ class Knight
 
       exists = search_tree(coords)
       place.possibilities[direction] = exists || fill_in(coords)
-      break if exists && end_loop(exists)
     end
     next_node = @moves.shift
     tree_builder(next_node) unless next_node.nil?
@@ -31,16 +30,6 @@ class Knight
     explore = KnightNode.new(node)
     @moves.push(explore)
     explore.object_id
-  end
-
-  def end_loop(location)
-    coord_set = ObjectSpace._id2ref(location).square.loc
-    if coord_set == @endpoint
-      @moves.clear
-      true
-    else
-      false
-    end
   end
 
   def find_square(place, direction)
